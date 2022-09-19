@@ -11,17 +11,19 @@ import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
+import androidx.lifecycle.ViewModel
 import com.example.matchwords.mvc.model.source.CapitalSource
 import com.example.matchwords.mvc.model.source.RandomFilteredSource
 import com.example.matchwordscompose.ui.theme.MatchWordsComposeTheme
@@ -29,8 +31,7 @@ import com.example.matchwordscompose.ui.theme.MatchWordsComposeTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.i("HSA", "$ *** on create")
-        val source= RandomFilteredSource(CapitalSource(),5).getSourceData()
+
         setContent {
             MatchWordsComposeTheme {
                 // A surface container using the 'background' color from the theme
@@ -39,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
 
-                    MatchWordApp(viewModel = MatchWordsViewModel(source))
+                    MatchWordApp(viewModel = MatchWordsViewModel())
                 }
             }
         }
@@ -55,98 +56,152 @@ fun MatchWordApp(viewModel: MatchWordsViewModel) {
             Box(modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .border(2.dp, Color.Red)){
-                WordList(list = viewModel.firstList
+                WordList(list = viewModel.firstList,
+                    selection = viewModel.first
                 ) { index -> viewModel.selectFirst(index) }
             }
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .border(2.dp, Color.Green)){
-                WordList(list = viewModel.secondList
+                WordList(list = viewModel.secondList,
+                    selection = viewModel.second
                 ) { index -> viewModel.selectSecond(index) }
             }
         }
 
-        val f= if(viewModel.first==-1) "boş" else viewModel.firstList[viewModel.first]
-        val s = if(viewModel.second==-1) "boş" else viewModel.secondList[viewModel.second]
-            Text(text = f )
-            Text(text = s )
 
         LazyColumn(modifier = Modifier.fillMaxWidth()){
             itemsIndexed(viewModel.selectedList){ index, pair ->
-                WordRow(pair = pair,
-                    viewModel.checkList[index]
+                SelectedWordPair(pair = pair,
+                    status= viewModel.checkList[index],
+                    gameStatus= viewModel.gameStatus,
+                    map=viewModel.dict,
+                    cancelSelection = {viewModel.cancelSelection(index)}
                 )
             }
         }
-        if(viewModel.isSelectionFinished){
-            Button(onClick={viewModel.checkCorrect()}){
-                Text("Check")
+        if(viewModel.gameStatus== Gamestatus.SELECTIONFINISHED){
+
+
+                Button(onClick={viewModel.checkCorrect()}){
+                    Text("Check")
+                }
+
+
+
+        }else if(viewModel.gameStatus == Gamestatus.CHECKFINISHED){
+            Row() {
+                TextField(
+                    value =viewModel.wordCount.toString(),
+                    onValueChange =  { string: String ->
+                        if(string.isDigitsOnly() && string.isNotBlank()){
+                            viewModel.setWordCount(string.toInt())
+                        }else{
+
+                        }
+
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+                Button(onClick = { viewModel.newGame() }) {
+                    Text("New Game")
+                }
             }
         }
     }
 }
 @Composable
-fun WordList(list: List<String>, itemClicked: (Int)-> Unit ){
+fun WordList(list: List<String>,
+             selection: Int=-1,
+             itemClicked: (Int)-> Unit ){
     LazyColumn(modifier = Modifier.padding(4.dp)){
         itemsIndexed(list){index,word->
             val offs= if(index%2==0) 0.dp else 32.dp
+            val style = if(selection==index) MaterialTheme.typography.h5 else MaterialTheme.typography.body2
+            val borderThickness = if(selection==index) 3.dp else 1.dp
             Text(
                 text=word ,
                 modifier = Modifier
-                    .offset(x= offs)
-                    .border(2.dp, Color.Black)
-                    .padding(4.dp)
+                    .offset(x = offs)
+                    .border(borderThickness, Color.Black)
+                    .padding(borderThickness)
                     .clickable {
                         itemClicked(index)
                     }
                 ,
-
                 textAlign = TextAlign.Center,
-
+                style = style
                 )
-
         }
     }
 }
 
 @Composable
-fun WordRow(
+fun SelectedWordPair(
     pair: Pair<String,String>,
     status: CheckStatus= CheckStatus.UNCHECKED,
-    firstClicked: () -> Unit = {},
-    secondClicked: () -> Unit = {}
+    gameStatus: Gamestatus,
+    map: Map<String,String> ,
+    cancelSelection: () -> Unit = {},
 ) {
-    val color= if(status== CheckStatus.FALSE) Color.Red else Color.Black
+    val color= when(status){
+        CheckStatus.CORRECT -> Color.Green
+        CheckStatus.FALSE -> Color.Red
+        CheckStatus.UNCHECKED -> Color.Black
+    }
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(4.dp)){
+
+        if(gameStatus== Gamestatus.STARTED || gameStatus== Gamestatus.SELECTIONFINISHED){
+        Icon(Icons.Filled.Clear, contentDescription = null, Modifier.clickable { cancelSelection()  })
+    }
+
         Text(
             pair.first ,
             modifier = Modifier
                 .fillMaxWidth(0.5f)
                 .border(2.dp, Color.Black)
                 .padding(4.dp)
-                .clickable {
-                    firstClicked()
-                }
+
 
             ,
             textAlign = TextAlign.Center,
 
         )
+        Column(){
+            Text(
+                pair.second ,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(2.dp, color)
+                    .padding(4.dp)
 
-        Text(
-            pair.second ,
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(2.dp, color)
-                .padding(4.dp)
-                .clickable { secondClicked() }
-            ,
-            textAlign = TextAlign.Center
-        )
+                ,
+                textAlign = TextAlign.Center
+            )
+            if(status== CheckStatus.FALSE){
+                map[pair.first]?.let{
+                    Text(text= it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(2.dp, Color.Green)
+                            .padding(4.dp)
+
+                        ,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+
+
+
+
     }
 }
+
+
 
 
 
