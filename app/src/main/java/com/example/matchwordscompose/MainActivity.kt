@@ -23,10 +23,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.matchwords.mvc.model.source.CapitalSource
 import com.example.matchwords.mvc.model.source.RandomFilteredSource
 import com.example.matchwordscompose.ui.theme.MatchWordsComposeTheme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,7 +41,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
 
-                    MatchWordApp(viewModel = MatchWordsViewModel())
+                    MatchWordApp()
                 }
             }
         }
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MatchWordApp(viewModel: MatchWordsViewModel) {
+fun MatchWordApp(viewModel: MatchWordsViewModel= viewModel()) {
     Column(modifier = Modifier
         .fillMaxWidth()
         ){
