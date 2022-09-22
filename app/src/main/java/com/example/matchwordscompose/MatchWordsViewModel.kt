@@ -3,7 +3,9 @@ package com.example.matchwordscompose
 import android.util.Log
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.matchwords.mvc.model.source.CapitalSource
+import com.example.matchwords.mvc.model.source.ISource
 import com.example.matchwords.mvc.model.source.RandomFilteredSource
 import com.example.matchwords.mvc.model.source.SampleSource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,9 +24,12 @@ enum class Gamestatus{
     NEWGAME
 }
 
-class MatchWordsViewModel() : ViewModel() {
+class MatchWordsViewModel(
+    private val database: ISource,
+    private val count:Int
+    ) : ViewModel() {
 
-    private var _wordCount by  mutableStateOf(8)
+    private var _wordCount by  mutableStateOf(count)
     val wordCount: Int
     get()=_wordCount
 
@@ -124,7 +129,7 @@ class MatchWordsViewModel() : ViewModel() {
         _selectedList.clear()
     }
     private fun newSet(){
-        sourceArray = RandomFilteredSource(CapitalSource(),_wordCount).getSourceData()
+        sourceArray = RandomFilteredSource(database,_wordCount).getSourceData()
         _firstList = sourceArray.map{        it[0]    }.shuffled().toMutableStateList()
         _secondList = sourceArray.map{        it[1]    }.shuffled().toMutableStateList()
         _dict = sourceArray.associate {
@@ -148,3 +153,8 @@ class MatchWordsViewModel() : ViewModel() {
 
 }
 
+class MatchWordsViewModelFactory(private val database: ISource, private val count: Int): ViewModelProvider.NewInstanceFactory(){
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return MatchWordsViewModel(database,count) as T
+    }
+}

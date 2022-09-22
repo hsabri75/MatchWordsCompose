@@ -7,12 +7,6 @@ class SampleSource: ISource {
             arrayOf("2", "two"),
             arrayOf("3", "three"),
             arrayOf("4", "four"),
-            arrayOf("5", "five"),
-            arrayOf("6", "six"),
-            arrayOf("7", "seven"),
-            arrayOf("8", "eight"),
-            arrayOf("9", "nine"),
-            arrayOf("10", "ten"),
         )
     }
 }
