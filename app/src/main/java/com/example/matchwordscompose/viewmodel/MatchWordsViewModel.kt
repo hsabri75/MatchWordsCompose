@@ -1,15 +1,11 @@
-package com.example.matchwordscompose
+package com.example.matchwordscompose.viewmodel
 
-import android.util.Log
+
 import androidx.compose.runtime.*
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.matchwords.mvc.model.source.CapitalSource
 import com.example.matchwords.mvc.model.source.ISource
 import com.example.matchwords.mvc.model.source.RandomFilteredSource
-import com.example.matchwords.mvc.model.source.SampleSource
-import kotlinx.coroutines.flow.MutableStateFlow
-import java.util.*
 
 enum class CheckStatus{
         UNCHECKED

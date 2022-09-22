@@ -16,12 +16,14 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,12 +32,17 @@ import com.example.matchwords.mvc.model.source.ISource
 import com.example.matchwords.mvc.model.source.RandomFilteredSource
 import com.example.matchwords.mvc.model.source.SampleSource
 import com.example.matchwordscompose.ui.theme.MatchWordsComposeTheme
+import com.example.matchwordscompose.viewmodel.CheckStatus
+import com.example.matchwordscompose.viewmodel.Gamestatus
+import com.example.matchwordscompose.viewmodel.MatchWordsViewModel
+import com.example.matchwordscompose.viewmodel.MatchWordsViewModelFactory
+import org.intellij.lang.annotations.JdkConstants
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val source = SampleSource()
+        val source = CapitalSource()
         val wordCount = 4
         setContent {
             MatchWordsComposeTheme {
@@ -51,6 +58,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+@Preview
+@Composable
+fun MatchWordsAppPreview(){
+    val source = CapitalSource()
+    val wordCount = 4
+    MatchWordsComposeTheme {
+        // A surface container using the 'background' color from the theme
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colors.background
+        ) {
+
+            MatchWordApp(source, wordCount)
+        }
+    }
+}
+
 
 @Composable
 fun MatchWordApp(source: ISource, count: Int) {
@@ -132,22 +157,27 @@ fun WordList(
 ) {
     LazyColumn(modifier = Modifier.padding(4.dp)) {
         itemsIndexed(list) { index, word ->
-            val offs = if (index % 2 == 0) 0.dp else 32.dp
+            val align= if (index % 2 == 0) Alignment.Start else Alignment.End
             val style =
                 if (selection == index) MaterialTheme.typography.h5 else MaterialTheme.typography.body2
             val borderThickness = if (selection == index) 3.dp else 1.dp
-            Text(
-                text = word,
-                modifier = Modifier
-                    .offset(x = offs)
-                    .border(borderThickness, Color.Black)
-                    .padding(borderThickness)
-                    .clickable {
-                        itemClicked(index)
-                    },
-                textAlign = TextAlign.Center,
-                style = style
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = align
+            ){
+                Text(
+                    text = word,
+                    modifier = Modifier
+                        .border(borderThickness, Color.Black)
+                        .padding(borderThickness)
+                        .clickable {
+                            itemClicked(index)
+                        },
+                    textAlign = TextAlign.Center,
+                    style = style,
+                )
+            }
+
         }
     }
 }
