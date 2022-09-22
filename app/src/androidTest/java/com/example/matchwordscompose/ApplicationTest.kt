@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
+import kotlin.concurrent.thread
 
 class ApplicationTest {
     @get:Rule
@@ -26,21 +27,4 @@ class ApplicationTest {
         composeAndroidRule.onNodeWithText("New Game").assertDoesNotExist()
     }
 
-    @Test
-    fun matchWordsApp_Rotation_CheckButtonVisible(){
-
-        composeAndroidRule.onNodeWithText("New Game").performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(0).performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(1).performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(0).performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(1).performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(0).performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(1).performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(0).performClick()
-        composeAndroidRule.onRoot().onChildAt(0).onChildAt(1).performClick()
-        composeAndroidRule.onNodeWithText("Check").assertExists()
-        composeAndroidRule.activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        composeAndroidRule.onNodeWithText("Check").assertExists()
-
-    }
 }
