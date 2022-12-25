@@ -29,7 +29,7 @@ class MatchWordsViewModel(
     private var _gameStatus by mutableStateOf(GameStatus.GAME_FINISHED)
     val gameStatus    get()= _gameStatus
 
-    private var _countText by mutableStateOf("4")
+    private var _countText by mutableStateOf("$count")
     val countText get()=_countText
 
     private var _isWordCountLegal by mutableStateOf(true)
