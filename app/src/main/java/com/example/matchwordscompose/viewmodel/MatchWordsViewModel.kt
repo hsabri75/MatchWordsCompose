@@ -15,6 +15,8 @@ enum class GameStatus{
     GAME_FINISHED,
 }
 
+
+
 class MatchWordsViewModel(
     private val database: ISource,
     count:Int
@@ -43,8 +45,7 @@ class MatchWordsViewModel(
         }catch(e: NumberFormatException){
             selectionModel.setWordCount(0)
         }
-        _isWordCountLegal= (selectionModel.wordCount in 3..20)
-
+        _isWordCountLegal= (selectionModel.wordCount in MINIMUM_QUESTION_COUNT..MAXIMUM_QUESTION_COUNT)
     }
 
     fun selectFirst(id: Int) {
@@ -82,6 +83,11 @@ class MatchWordsViewModel(
         _sourceArray = RandomFilteredSource(database,selectionModel.wordCount).getSourceData()
         selectionModel.newGame()
         checkGameStatus()
+    }
+
+    companion object{
+        val MINIMUM_QUESTION_COUNT=3
+        val MAXIMUM_QUESTION_COUNT=15
     }
 
 
